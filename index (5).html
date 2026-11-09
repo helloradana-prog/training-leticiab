@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Letícia Bonalume · Hellora Consultoria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;1,500;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+  :root{
+    --preto: #1a1a1a;
+    --preto-puro: #000000;
+    --cinza-claro: #f0f0f0;
+    --branco: #FFFFFF;
+    --tinta: #1a1a1a;
+    --tinta-suave: #666666;
+    --linha: #e5e5e5;
+    --sombra: 0 10px 28px rgba(26,26,26,0.12);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:'Jost', sans-serif;
+    background: var(--branco);
+    color: var(--tinta);
+    min-height:100vh;
+    padding-bottom: 90px;
+  }
+  .hero{
+    position:relative;
+    padding: 30px 20px 46px;
+    background: linear-gradient(135deg, #e8e8e8 0%, #fafafa 100%);
+    overflow:hidden;
+    color: var(--tinta);
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    right:-60px; top:-60px;
+    width:220px; height:220px;
+    background: radial-gradient(circle, rgba(26,26,26,0.15) 0%, rgba(26,26,26,0) 70%);
+    border-radius:50%;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    left:-40px; bottom:-80px;
+    width:180px; height:180px;
+    background: radial-gradient(circle, rgba(26,26,26,0.1) 0%, rgba(26,26,26,0) 70%);
+    border-radius:50%;
+  }
+  .hero-top{display:flex; justify-content:space-between; align-items:flex-start; position:relative; z-index:2;}
+  .eyebrow{
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    opacity:.85; font-weight:500; color: var(--preto);
+  }
+  .nome{
+    font-family:'Fraunces', serif; font-style:italic; font-weight:500;
+    font-size:32px; margin: 4px 0 2px; line-height:1.05;
+  }
+  .sub{font-size:13px; opacity:.9;}
+  .pill{
+    background: rgba(26,26,26,0.1);
+    border:1px solid rgba(26,26,26,0.2);
+    color: var(--preto);
+    border-radius:100px; padding:6px 12px; font-size:12px;
+    backdrop-filter: blur(4px);
+    white-space:nowrap;
+  }
+  .tabs{
+    display:flex; gap:6px; padding: 0 14px; margin-top:-26px; position:relative; z-index:3;
+  }
+  .tab-btn{
+    flex:1; text-align:center; padding:12px 4px; border-radius:16px;
+    background:#fff; border:1px solid var(--linha);
+    font-family:'Jost'; font-size:12.5px; font-weight:500; color: var(--tinta-suave);
+    box-shadow: var(--sombra);
+    cursor:pointer; transition: all .15s ease;
+  }
+  .tab-btn.active{
+    background: linear-gradient(135deg, #1a1a1a, #333333);
+    color: var(--branco); border-color: transparent;
+  }
+  .content{ padding: 22px 16px 10px; max-width:560px; margin:0 auto;}
+  .view{display:none; animation: fade .25s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .section-title{
+    font-family:'Fraunces'; font-style:italic; font-weight:500;
+    font-size:20px; margin: 18px 2px 10px; color: var(--preto);
+  }
+  .section-title:first-child{margin-top:0;}
+
+  .treino-switch{
+    display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:8px;
+  }
+  .treino-chip{
+    flex:0 0 auto; padding:9px 16px; border-radius:100px; font-size:13px; font-weight:500;
+    background: var(--cinza-claro); color: var(--preto); border:1px solid var(--linha);
+    cursor:pointer; white-space:nowrap;
+  }
+  .treino-chip.active{ background: var(--preto-puro); color:#fff; border-color:var(--preto-puro);}
+  .treino-sub{font-size:12.5px; color:var(--tinta-suave); margin: 2px 2px 12px;}
+
+  .card{
+    background:#fff; border:1px solid var(--linha); border-radius:18px;
+    padding:14px 14px 12px; margin-bottom:12px; box-shadow: 0 4px 16px rgba(26,26,26,0.05);
+  }
+  .card-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .ex-nome{font-size:15px; font-weight:500;}
+  .ex-foco{font-size:11.5px; color:var(--preto); background:var(--cinza-claro); border-radius:8px; padding:2px 8px; display:inline-block; margin-top:4px;}
+  .check{
+    width:26px; height:26px; border-radius:8px; border:2px solid var(--linha);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto;
+    transition: all .15s;
+  }
+  .check.done{ background: var(--preto); border-color: var(--preto); }
+  .check.done::after{content:"✓"; color:#fff; font-size:15px; font-weight:600;}
+  .badges{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  .badge{font-size:11px; padding:4px 9px; border-radius:8px; background:#f5f5f5; color:var(--tinta-suave); font-weight:500;}
+  .badge.rpe{background:var(--cinza-claro); color:var(--preto);}
+  .load-row{display:flex; align-items:center; gap:8px; margin-top:10px;}
+  .load-row label{font-size:11.5px; color:var(--tinta-suave);}
+  .load-row input{
+    flex:1; border:1px solid var(--linha); border-radius:10px; padding:8px 10px;
+    font-family:'Jost'; font-size:13px; color:var(--tinta);
+  }
+  .load-row input:focus{outline:none; border-color:var(--preto);}
+  .ex-obs{font-size:11.5px; color:var(--tinta-suave); margin-top:8px; line-height:1.45;}
+  .ex-ref{font-size:11px; color:var(--tinta-suave); margin-top:6px;}
+
+  .save-bar{
+    position:sticky; bottom:0; padding: 12px 0 4px; background: linear-gradient(to top, #fff 60%, rgba(255,255,255,0));
+  }
+  .save-btn{
+    width:100%; border:none; padding:15px; border-radius:16px; font-family:'Jost'; font-size:15px; font-weight:500;
+    background: linear-gradient(135deg, #1a1a1a, #333333); color:#fff; cursor:pointer;
+    box-shadow: var(--sombra);
+  }
+  .save-btn:active{transform: scale(.98);}
+  .toast{
+    position:fixed; left:50%; bottom:100px; transform:translateX(-50%) translateY(20px);
+    background:var(--tinta); color:#fff; padding:10px 18px; border-radius:100px; font-size:13px;
+    opacity:0; transition: all .25s; pointer-events:none; z-index:50;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .guia-item{margin-bottom:14px; padding:12px; background:#f9f9f9; border-radius:12px;}
+  .guia-desc{font-size:13px; color:var(--tinta-suave); line-height:1.6; margin-top:6px;}
+  .guia-parte{margin:8px 0 6px 0; font-weight:500; color:var(--preto); font-size:12px;}
+
+  .rpe-table{width:100%; border-collapse:collapse; font-size:13px;}
+  .rpe-table td{padding:8px 6px; border-bottom:1px solid var(--linha); vertical-align:top;}
+  .rpe-num{
+    width:30px; height:30px; border-radius:8px; background:var(--preto); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:600; font-size:13px;
+  }
+  .rpe-note{font-size:11.5px; color:var(--tinta-suave); margin-top:10px; line-height:1.5;}
+
+  .week-switch{display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:14px;}
+  .week-chip{flex:0 0 auto; padding:7px 13px; border-radius:100px; font-size:12.5px; background:var(--cinza-claro); color:var(--preto); cursor:pointer;}
+  .week-chip.active{background:var(--preto); color:#fff;}
+  .eval-cat{margin-bottom:14px;}
+  .eval-cat-name{font-size:13.5px; font-weight:500; margin-bottom:6px;}
+  .eval-scale{display:flex; gap:6px;}
+  .eval-dot{
+    flex:1; text-align:center; padding:9px 0; border-radius:10px; border:1px solid var(--linha);
+    font-size:13px; font-weight:500; color:var(--tinta-suave); cursor:pointer;
+  }
+  .eval-dot.active{background:var(--preto); color:#fff; border-color:var(--preto);}
+  textarea.obs{
+    width:100%; border:1px solid var(--linha); border-radius:12px; padding:10px; font-family:'Jost';
+    font-size:13px; min-height:70px; resize:vertical;
+  }
+  textarea.obs:focus{outline:none; border-color:var(--preto);}
+
+  .perfil-row{display:flex; justify-content:space-between; align-items:center; padding:12px 2px; border-bottom:1px solid var(--linha); font-size:13.5px;}
+  .perfil-row:last-child{border-bottom:none;}
+  .perfil-label{color:var(--tinta-suave);}
+  .perfil-value{font-weight:500; text-align:right;}
+  .peso-edit{display:flex; align-items:center; gap:8px;}
+  .peso-edit input{width:70px; border:1px solid var(--linha); border-radius:10px; padding:6px 8px; font-family:'Jost'; font-size:13.5px; text-align:right;}
+
+  /* ── Letícia B · Ciclo 2: aviso de progressão, aviso de cólica, registro de cólica ── */
+  .aviso{
+    background:#f9f9f9; border:1px solid var(--linha); border-left:4px solid var(--preto);
+    border-radius:14px; padding:12px 14px; margin-bottom:12px;
+  }
+  .aviso-topo{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .aviso-titulo{font-family:'Fraunces'; font-style:italic; font-weight:500; font-size:17px;}
+  .aviso-tag{font-size:11.5px; font-weight:500; background:var(--preto); color:#fff; border-radius:100px; padding:3px 10px; white-space:nowrap;}
+  .aviso-texto{font-size:12.5px; line-height:1.45; margin-top:6px;}
+  .aviso-nota{font-size:10.5px; color:var(--tinta-suave); margin-top:6px;}
+  .aviso.colica{border-left-color:#777; background:#fff;}
+
+  .sub-label{font-size:12px; color:var(--tinta-suave); margin:12px 0 6px;}
+  .chips{display:flex; gap:6px; flex-wrap:wrap;}
+  .chip-opt{
+    padding:8px 12px; border-radius:100px; font-size:12.5px; border:1px solid var(--linha);
+    background:#fff; color:var(--tinta); cursor:pointer;
+  }
+  .chip-opt.active{background:var(--preto); color:#fff; border-color:var(--preto);}
+  .date-input{
+    border:1px solid var(--linha); border-radius:10px; padding:8px 10px; font-family:'Jost'; font-size:13.5px; color:var(--tinta);
+  }
+  .btn-row{display:flex; gap:8px; margin-top:12px;}
+  .btn-sec{
+    flex:1; border:1px solid var(--preto); background:#fff; color:var(--preto); padding:12px; border-radius:14px;
+    font-family:'Jost'; font-size:14px; font-weight:500; cursor:pointer;
+  }
+  .btn-pri{
+    flex:2; border:none; background: linear-gradient(135deg, #1a1a1a, #333333); color:#fff; padding:12px; border-radius:14px;
+    font-family:'Jost'; font-size:14px; font-weight:500; cursor:pointer;
+  }
+  .cal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .cal-nav{width:34px; height:34px; border-radius:50%; border:1px solid var(--linha); background:#fff; font-size:16px; cursor:pointer;}
+  .cal-mes{font-family:'Fraunces'; font-style:italic; font-size:16px;}
+  .cal-grid{display:grid; grid-template-columns: repeat(7, 1fr); gap:4px;}
+  .cal-dow{font-size:10.5px; color:var(--tinta-suave); text-align:center; padding-bottom:2px;}
+  .cal-day{
+    aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; border-radius:9px;
+    font-size:12.5px; border:1px solid var(--linha); cursor:pointer; background:#fff; color:var(--tinta);
+  }
+  .cal-day.vazio{border:none; cursor:default; background:transparent;}
+  .cal-day.hoje{border:2px solid var(--preto);}
+  .cal-day.i1{background:#e0e0e0;}
+  .cal-day.i2{background:#8a8a8a; color:#fff; border-color:#8a8a8a;}
+  .cal-day.i3{background:#1a1a1a; color:#fff; border-color:#1a1a1a;}
+  .cal-day.janela{background-image: repeating-linear-gradient(45deg, rgba(26,26,26,.10) 0 3px, transparent 3px 7px);}
+  .cal-legenda{display:flex; gap:12px; flex-wrap:wrap; font-size:11px; color:var(--tinta-suave); margin-top:10px;}
+  .cal-legenda span{display:inline-flex; align-items:center; gap:5px;}
+  .sw{width:12px; height:12px; border-radius:3px; display:inline-block; border:1px solid var(--linha);}
+  .padrao-num{font-family:'Fraunces'; font-style:italic; font-size:26px; line-height:1.1;}
+  .padrao-row{display:flex; gap:10px; margin-top:8px;}
+  .padrao-box{flex:1; background:#f5f5f5; border-radius:12px; padding:10px 12px;}
+  .padrao-lbl{font-size:11px; color:var(--tinta-suave); margin-top:2px;}
+  .reg-lista{margin-top:8px;}
+  .reg-item{font-size:12.5px; padding:8px 0; border-bottom:1px solid var(--linha); line-height:1.4;}
+  .reg-item:last-child{border-bottom:none;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-top">
+    <div>
+      <div class="eyebrow">Hellora Consultoria</div>
+      <div class="nome">Letícia Bonalume</div>
+      <div class="sub">Ciclo 2 · 4x por semana</div>
+    </div>
+    <div class="pill" id="semanaPill">Semana 1</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab-btn active" data-view="treino">Treino</div>
+  <div class="tab-btn" data-view="guia">Guia</div>
+  <div class="tab-btn" data-view="avaliacao">Avaliação</div>
+  <div class="tab-btn" data-view="perfil">Perfil</div>
+</div>
+
+<div class="content">
+
+  <!-- TREINO -->
+  <div class="view active" id="view-treino">
+    <div id="avisoColica"></div>
+    <div class="week-switch" id="weekSwitchTreino"></div>
+    <div class="aviso" id="avisoProgressao"></div>
+    <div class="treino-switch" id="treinoSwitch"></div>
+    <div class="treino-sub" id="treinoSub"></div>
+    <div id="exList"></div>
+    <div class="save-bar">
+      <button class="save-btn" id="btnSalvarTreino">Salvar treino</button>
+    </div>
+  </div>
+
+  <!-- GUIA -->
+  <div class="view" id="view-guia">
+    <div class="section-title">Escala de Intensidade — RPE</div>
+    <table class="rpe-table">
+      <tr><td><div class="rpe-num">10</div></td><td>Falha total — não conseguiria completar mais nenhuma repetição.</td></tr>
+      <tr><td><div class="rpe-num">9</div></td><td>Sobrariam no máximo 1 repetição — esforço muito alto.</td></tr>
+      <tr><td><div class="rpe-num">8</div></td><td>Sobrariam cerca de 2 repetições — esforço alto, controlado.</td></tr>
+      <tr><td><div class="rpe-num">7</div></td><td>Sobrariam cerca de 3 repetições — esforço moderado-alto.</td></tr>
+      <tr><td><div class="rpe-num">6</div></td><td>Sobrariam 4 ou mais repetições — esforço leve, usado em core e ativação.</td></tr>
+    </table>
+    <div class="rpe-note">
+      <b>Progressão de 3 em 3 semanas:</b> nas semanas 1–3 encontre a carga e mantenha. Nas <b>semanas 4, 7 e 10</b> suba a carga, se nas 3 semanas anteriores você fechou todas as séries no RPE pedido. Se não fechou, mantenha mais 3 semanas. Semana 13: mantenha as cargas (semana de fotos e medidas).<br><br>
+      <b>Joelho:</b> agachamento taça, cadeira extensora e leg press ficam sempre em RPE 6-7, sem ir à falha e sem travar o joelho. A carga desses sobe devagar.<br><br>
+      <b>Semanas de cólica:</b> baixe 1 a 2 pontos de RPE e tire 1 série de cada exercício. Treinar mais leve é melhor que faltar.<br><br>
+      <b>Core e abdominal:</b> sempre com controle, lombar protegida e respiração solta.
+    </div>
+
+    <div class="section-title">Guia de Execução</div>
+    <div id="guiaList"></div>
+  </div>
+
+  <!-- AVALIAÇÃO -->
+  <div class="view" id="view-avaliacao">
+    <div class="section-title">Avaliação semanal</div>
+    <div class="week-switch" id="weekSwitch"></div>
+    <div id="evalCats"></div>
+    <div class="eval-cat">
+      <div class="eval-cat-name">Observações da semana</div>
+      <textarea class="obs" id="evalObs" placeholder="Como foi a semana? Teve cólica? Dor na lombar ou no joelho? Cansaço? Trocou de máquina?"></textarea>
+    </div>
+    <div class="save-bar">
+      <button class="save-btn" id="btnSalvarAvaliacao">Salvar avaliação</button>
+    </div>
+
+    <div class="section-title">Meu ciclo — registro de cólica</div>
+    <div class="card">
+      <div style="font-size:12.5px; line-height:1.5; color:var(--tinta-suave);">
+        Mesmo sem menstruar por causa do DIU, os sintomas podem seguir um padrão. Registre <b>todo dia em que tiver cólica</b>. Com o tempo, o site mostra de quanto em quanto tempo ela aparece e avisa quando a próxima janela está chegando.
+      </div>
+      <div class="sub-label">Data</div>
+      <input type="date" class="date-input" id="colicaData">
+      <div class="sub-label">Intensidade da cólica</div>
+      <div class="chips" id="colicaInt"></div>
+      <div class="sub-label">Teve também? (opcional)</div>
+      <div class="chips" id="colicaSint"></div>
+      <div class="sub-label">Observação (opcional)</div>
+      <textarea class="obs" id="colicaObs" style="min-height:52px;" placeholder="Ex.: precisou de remédio, treinou mais leve..."></textarea>
+      <div class="btn-row">
+        <button class="btn-sec" id="btnColicaApagar" style="display:none;">Apagar</button>
+        <button class="btn-pri" id="btnColicaSalvar">Registrar cólica</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cal-head">
+        <button class="cal-nav" id="calPrev">‹</button>
+        <div class="cal-mes" id="calMes"></div>
+        <button class="cal-nav" id="calNext">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legenda">
+        <span><i class="sw" style="background:#e0e0e0;"></i>Leve</span>
+        <span><i class="sw" style="background:#8a8a8a;"></i>Moderada</span>
+        <span><i class="sw" style="background:#1a1a1a;"></i>Forte</span>
+        <span><i class="sw" style="background-image:repeating-linear-gradient(45deg, rgba(26,26,26,.25) 0 3px, transparent 3px 7px);"></i>Janela provável</span>
+      </div>
+      <div style="font-size:11px; color:var(--tinta-suave); margin-top:6px;">Toque num dia para registrar, editar ou apagar.</div>
+    </div>
+
+    <div class="card">
+      <div class="eval-cat-name">Seu padrão</div>
+      <div id="padraoBox"></div>
+    </div>
+  </div>
+
+  <!-- PERFIL -->
+  <div class="view" id="view-perfil">
+    <div class="section-title">Perfil</div>
+    <div class="card">
+      <div class="perfil-row"><span class="perfil-label">Nome completo</span><span class="perfil-value">Letícia Bonalume</span></div>
+      <div class="perfil-row"><span class="perfil-label">Idade</span><span class="perfil-value">27 anos</span></div>
+      <div class="perfil-row"><span class="perfil-label">Altura</span><span class="perfil-value">176 cm</span></div>
+      <div class="perfil-row">
+        <span class="perfil-label">Peso atual</span>
+        <span class="peso-edit"><input type="number" id="pesoInput" step="0.1"> kg</span>
+      </div>
+      <div class="perfil-row"><span class="perfil-label">Cintura</span><span class="perfil-value">71 cm</span></div>
+      <div class="perfil-row"><span class="perfil-label">Quadril</span><span class="perfil-value">98 cm</span></div>
+      <div class="perfil-row"><span class="perfil-label">Coxa</span><span class="perfil-value">58 cm</span></div>
+      <div class="perfil-row"><span class="perfil-label">Bíceps</span><span class="perfil-value">27 cm</span></div>
+      <div class="perfil-row"><span class="perfil-label">Gordura (bioimpedância)</span><span class="perfil-value">27,3%</span></div>
+    </div>
+    <div class="section-title">Objetivo</div>
+    <div class="card">
+      <div style="font-size:13.5px; line-height:1.5;"><b>Definição de braços e ombros</b>, mantendo o ganho de glúteo do Ciclo 1. Sem foco em emagrecer.<br><br>Estrutura: 4 treinos por semana (A, B, C e D). Mesma base do Ciclo 1, com ajustes pontuais e mais volume para os superiores.</div>
+    </div>
+    <div class="section-title">Protocolo Personalizado</div>
+    <div class="card">
+      <div style="font-size:13.5px; line-height:1.5;">
+        <b>Fortalecimento de Core:</b> Respiração Diafragmática + Dead Bug + Glute Squeeze no início de TODOS os treinos (2 séries de cada).<br><br>
+        <b>Abdominal:</b> Bloco 1 no Treino B e Bloco 2 no Treino D.<br><br>
+        <b>Cardio:</b> 10 min de esteira em trote leve ao final de cada treino.<br><br>
+        <b>Progressão:</b> de 3 em 3 semanas (semanas 4, 7 e 10), se fechou todas as séries no RPE pedido.<br><br>
+        <b>Joelho:</b> agachamento taça, extensora e leg press sempre em RPE 6-7, sem descida profunda e sem travar o joelho.<br><br>
+        <b>Cólica:</b> registre na aba Avaliação. Nas semanas de cólica, treine mais leve (RPE 1-2 pontos menor e 1 série a menos) em vez de faltar.<br><br>
+        <b>Hidratação:</b> a bioimpedância mostrou água baixa — leve a garrafinha para o treino.
+      </div>
+    </div>
+    <div class="save-bar">
+      <button class="save-btn" id="btnSalvarPerfil">Salvar peso</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Salvo!</div>
+
+<script>
+const CORE_HELLORA = {slug:"core", nome:"Fortalecimento de Core", isCore:true, subItems:[
+  {slug:"respiracao-diafragmatica", nome:"Respiração Diafragmática", series:2, reps:"10"},
+  {slug:"dead-bug", nome:"Dead Bug", series:2, reps:"10 cada lado"},
+  {slug:"glute-squeeze", nome:"Glute Squeeze (deitada)", series:2, reps:"10"}
+]};
+
+const ABD_BLOCO_1 = {slug:"abdominal-bloco-1", nome:"Abdominal — Bloco 1", isBloco:true, subItems:[
+  {slug:"infra-joelho-dobrado", nome:"Infra com joelho dobrado", series:3, reps:"12"},
+  {slug:"prancha-isometrica", nome:"Prancha isométrica", series:3, reps:"45 seg"},
+  {slug:"prancha-lateral", nome:"Prancha lateral", series:3, reps:"30 seg cada lado"}
+]};
+
+const ABD_BLOCO_2 = {slug:"abdominal-bloco-2", nome:"Abdominal — Bloco 2", isBloco:true, subItems:[
+  {slug:"prancha-frontal", nome:"Prancha frontal", series:3, reps:"45 seg"},
+  {slug:"toque-calcanhar", nome:"Toque no calcanhar (deitada)", series:3, reps:"20 cada lado"},
+  {slug:"abdominal-remador", nome:"Abdominal remador", series:3, reps:"15"}
+]};
+
+const ESTEIRA = {slug:"esteira", nome:"Esteira — 10 min", foco:"Cardio leve", series:1, reps:"10 min", descanso:"—", rpe:"5-6", options:"Trote leve. Se o joelho incomodar, troque por caminhada inclinada."};
+
+const TREINOS = {
+  "A": {
+    label: "Treino A",
+    sub: "Adutor + Quadríceps + Panturrilha + Tríceps",
+    exercicios: [
+      CORE_HELLORA,
+      {slug:"cadeira-adutora", nome:"Cadeira Adutora", foco:"Adutor", series:3, reps:"10", descanso:"60-90 seg", rpe:"7-8", load:true},
+      {slug:"agachamento-taca", nome:"Agachamento Taça", foco:"Quadríceps / glúteo", series:3, reps:"10", descanso:"60-90 seg", rpe:"6-7", load:true, obs:"Desça só até sentar de leve no banco. Nunca até a falha."},
+      {slug:"cadeira-extensora", nome:"Cadeira Extensora (amplitude parcial)", foco:"Quadríceps", series:3, reps:"10", descanso:"60-90 seg", rpe:"6-7", load:true, ref:"75", obs:"Não travar o joelho no topo. Nunca até a falha."},
+      {slug:"leg-press", nome:"Leg Press 45° (amplitude parcial)", foco:"Quadríceps", series:3, reps:"10", descanso:"60-90 seg", rpe:"6-7", load:true, ref:"150", obs:"Sem descida profunda. Nunca até a falha."},
+      {slug:"panturrilha-em-pe", nome:"Panturrilha em Pé", foco:"Panturrilha", series:3, reps:"12", descanso:"45-60 seg", rpe:"8", load:true, ref:"52"},
+      {slug:"triceps-barra-reta", nome:"Tríceps na Polia — Barra Reta", foco:"Tríceps", series:3, reps:"12", descanso:"45-60 seg", rpe:"8", load:true},
+      ESTEIRA
+    ]
+  },
+  "B": {
+    label: "Treino B",
+    sub: "Costas + Ombro + Bíceps",
+    exercicios: [
+      CORE_HELLORA,
+      {slug:"puxada-alta-aberta", nome:"Puxada Alta (pegada aberta)", foco:"Costas — largura", series:4, reps:"12", descanso:"60-90 seg", rpe:"7-8", load:true, ref:"38"},
+      {slug:"remada-baixa-anatomica", nome:"Remada Baixa — Barra Anatômica (pegada aberta)", foco:"Costas — espessura", series:3, reps:"12", descanso:"60-90 seg", rpe:"8", load:true},
+      {slug:"crucifixo-inverso", nome:"Crucifixo Inverso na Máquina", foco:"Ombro — posterior / costas", series:3, reps:"12", descanso:"45-60 seg", rpe:"7-8", load:true, ref:"18"},
+      {slug:"elevacao-lateral", nome:"Elevação Lateral", foco:"Ombro — lateral", series:3, reps:"12", descanso:"45-60 seg", rpe:"8", load:true, ref:"6"},
+      {slug:"rosca-direta-w", nome:"Rosca Direta — Barra W", foco:"Bíceps", series:3, reps:"12", descanso:"60 seg", rpe:"8", load:true, ref:"15"},
+      {slug:"rosca-martelo", nome:"Rosca Martelo", foco:"Bíceps / braquial", series:3, reps:"12", descanso:"60 seg", rpe:"8", load:true},
+      ABD_BLOCO_1,
+      ESTEIRA
+    ]
+  },
+  "C": {
+    label: "Treino C",
+    sub: "Glúteo + Posterior de coxa",
+    exercicios: [
+      CORE_HELLORA,
+      {slug:"elevacao-pelvica", nome:"Elevação Pélvica", foco:"Glúteo — principal", series:4, reps:"10", descanso:"60-90 seg", rpe:"8-9", load:true, ref:"120"},
+      {slug:"stiff", nome:"Stiff", foco:"Posterior de coxa / glúteo", series:3, reps:"10", descanso:"60-90 seg", rpe:"7", load:true},
+      {slug:"flexora-em-pe", nome:"Flexora em Pé na Máquina", foco:"Posterior de coxa", series:3, reps:"10 cada perna", descanso:"60 seg", rpe:"8", load:true},
+      {slug:"cadeira-flexora-bilateral", nome:"Cadeira Flexora Bilateral", foco:"Posterior de coxa", series:3, reps:"10", descanso:"60 seg", rpe:"8", load:true, ref:"32"},
+      {slug:"coice-polia-elevada", nome:"Coice na Polia Elevada (altura do quadril)", foco:"Glúteo", series:3, reps:"10", descanso:"45-60 seg", rpe:"8", load:true},
+      {slug:"abdutora-tronco-inclinado", nome:"Cadeira Abdutora com Tronco Inclinado", foco:"Glúteo — lateral", series:3, reps:"10", descanso:"45-60 seg", rpe:"8", load:true},
+      ESTEIRA
+    ]
+  },
+  "D": {
+    label: "Treino D",
+    sub: "Ombro + Peito + Tríceps",
+    exercicios: [
+      CORE_HELLORA,
+      {slug:"elevacao-lateral", nome:"Elevação Lateral", foco:"Ombro — lateral (principal)", series:4, reps:"12", descanso:"45-60 seg", rpe:"8", load:true, ref:"6"},
+      {slug:"desenvolvimento-halteres", nome:"Desenvolvimento com Halteres", foco:"Ombro", series:3, reps:"10", descanso:"60-90 seg", rpe:"7-8", load:true, ref:"9"},
+      {slug:"supino-reto", nome:"Supino Reto", foco:"Peito", series:3, reps:"10", descanso:"60-90 seg", rpe:"7-8", load:true},
+      {slug:"peck-deck", nome:"Peck Deck", foco:"Peito", series:3, reps:"12", descanso:"60-90 seg", rpe:"8", load:true, ref:"25"},
+      {slug:"triceps-corda", nome:"Tríceps Corda", foco:"Tríceps", series:3, reps:"12", descanso:"45-60 seg", rpe:"8", load:true, ref:"15"},
+      {slug:"triceps-frances", nome:"Tríceps Francês", foco:"Tríceps", series:3, reps:"12", descanso:"60 seg", rpe:"8", load:true, ref:"15"},
+      ABD_BLOCO_2,
+      ESTEIRA
+    ]
+  }
+};
+
+const GUIA = {
+  "respiracao-diafragmatica": {
+    pos: "Deitada de barriga para cima, joelhos dobrados, pés apoiados. Uma mão na barriga.",
+    mec: "Inspire pelo nariz deixando a BARRIGA subir (não as costelas). Solte o ar devagar pela boca, levando o umbigo para dentro.",
+    dica: "Respiração pela barriga, não pelo peito. Prepara o core profundo e protege a lombar."
+  },
+  "dead-bug": {
+    pos: "Deitada, lombar apoiada no chão, braços estendidos para o teto, pernas em 90° (quadril e joelhos dobrados).",
+    mec: "Estenda o braço direito para trás e a perna esquerda para frente, soltando o ar. Volte e alterne. Lento e controlado.",
+    dica: "A lombar NUNCA sai do chão. Se sair, diminua a amplitude."
+  },
+  "glute-squeeze": {
+    pos: "Deitada de barriga para cima, joelhos dobrados, pés apoiados na largura do quadril.",
+    mec: "Eleve levemente o quadril do chão e contraia o glúteo com força por 2-3 segundos. Desça devagar e repita.",
+    dica: "Ativa o glúteo antes do treino. Sem arquear a lombar — quem trabalha é o glúteo."
+  },
+  "cadeira-adutora": {
+    pos: "Sentada, costas apoiadas, pernas encaixadas nos apoios com as pernas abertas.",
+    mec: "Feche as pernas de forma controlada, sentindo a parte interna da coxa. Volte devagar até a abertura inicial.",
+    dica: "Sem soltar o peso na volta. Ritmo: 2 seg fechando, 2 seg abrindo."
+  },
+  "agachamento-taca": {
+    pos: "Em pé, pés um pouco mais afastados que o quadril, pontas levemente para fora. Halter ou kettlebell na frente do peito, segurado com as duas mãos. Um banco atrás de você.",
+    mec: "Desça levando o quadril para trás e para baixo, até sentar de leve no banco (coxa mais ou menos paralela ao chão). Suba empurrando o chão, sem travar o joelho no topo.",
+    dica: "O banco é o seu limite: nada de descida profunda. Joelhos sempre na direção da ponta dos pés — pense em \"empurrar o chão para fora\" na subida."
+  },
+  "cadeira-extensora": {
+    pos: "Sentada, costas apoiadas, joelho alinhado com o eixo da máquina, rolo na frente do tornozelo.",
+    mec: "Estenda as pernas até QUASE esticar, sem travar o joelho no topo. Desça controlando até cerca de 90°.",
+    dica: "Nunca até a falha (joelho). Ritmo lento, sem soltar o peso."
+  },
+  "leg-press": {
+    pos: "Costas e cabeça apoiadas, pés na parte alta da plataforma, na largura dos ombros.",
+    mec: "Empurre a plataforma sem travar os joelhos. Desça só até o ponto confortável, sem descida profunda.",
+    dica: "Nunca até a falha (joelho). A lombar nunca sai do encosto."
+  },
+  "panturrilha-em-pe": {
+    pos: "Em pé, ponta dos pés no apoio, calcanhares livres.",
+    mec: "Suba na ponta dos pés o máximo possível, pausa de 1 seg no topo, e desça alongando bem.",
+    dica: "Amplitude completa, sem quicar embaixo."
+  },
+  "triceps-barra-reta": {
+    pos: "Em pé, de frente para a polia alta, barra reta nas mãos (palmas para baixo), cotovelos colados ao lado do corpo.",
+    mec: "Empurre a barra para baixo até quase esticar os braços. Volte controlando até cerca de 90°.",
+    dica: "Só o cotovelo se mexe. Tronco parado, sem jogar o corpo sobre a barra."
+  },
+  "esteira": {
+    pos: "Esteira sem inclinação, velocidade de trote leve.",
+    mec: "10 minutos em ritmo de trote em que você ainda consegue falar frases curtas.",
+    dica: "Pisada leve e passos curtos. Se o joelho incomodar, troque por caminhada inclinada (inclinação 8 a 12%)."
+  },
+  "puxada-alta-aberta": {
+    pos: "Sentada, coxas presas no apoio, pegada aberta na barra, tronco levemente inclinado para trás.",
+    mec: "Puxe a barra até a parte de cima do peito, levando os cotovelos para baixo e para trás. Volte até quase esticar os braços.",
+    dica: "Encaixe as escápulas (ombros para trás e para baixo) antes de puxar. Sem balançar o tronco."
+  },
+  "remada-baixa-anatomica": {
+    pos: "Sentada, pés apoiados, joelhos levemente dobrados, tronco ereto. Barra anatômica presa no cabo, pegada mais aberta.",
+    mec: "Puxe a barra até a parte de baixo do peito, levando os cotovelos para trás e para os lados e juntando as escápulas. Volte controlando sem arredondar as costas.",
+    dica: "A pegada aberta trabalha mais a parte de cima das costas e o ombro posterior. Quem puxa são as costas, não os braços."
+  },
+  "elevacao-lateral": {
+    pos: "Em pé, halteres ao lado do corpo, cotovelos levemente dobrados.",
+    mec: "Eleve os braços para os lados até a linha dos ombros. Desça devagar (2 seg).",
+    dica: "Pense em levar os cotovelos para longe, não as mãos para cima. Sem impulso do tronco. É o exercício que dá o contorno do ombro."
+  },
+  "rosca-direta-w": {
+    pos: "Em pé, barra W nas mãos, cotovelos fixos ao lado do corpo.",
+    mec: "Suba a barra dobrando os cotovelos até a altura do peito. Desça controlando (2-3 seg).",
+    dica: "Sem balançar o corpo. A descida lenta é a parte que mais faz o braço crescer."
+  },
+  "rosca-martelo": {
+    pos: "Em pé, um halter em cada mão, palmas viradas uma para a outra (pegada neutra), cotovelos colados ao corpo.",
+    mec: "Suba os halteres sem girar o punho, até perto do ombro. Desça controlando.",
+    dica: "Trabalha bíceps e o músculo ao lado dele (braquial), que dá volume ao braço visto de lado."
+  },
+  "infra-joelho-dobrado": {
+    pos: "Deitada de barriga para cima, joelhos dobrados em 90° no ar, braços ao lado do corpo, lombar apoiada.",
+    mec: "Solte o ar e leve os joelhos em direção ao peito, tirando um pouco o quadril do chão. Volte devagar sem deixar a lombar arquear.",
+    dica: "O movimento é pequeno: quem sobe é o quadril, não as pernas balançando. Ótimo para a postura do quadril."
+  },
+  "prancha-isometrica": {
+    pos: "Apoio nos antebraços e na ponta dos pés, cotovelos embaixo dos ombros, corpo reto da cabeça aos calcanhares.",
+    mec: "Segure a posição por 45 segundos, respirando normalmente.",
+    dica: "Contraia o glúteo e leve o umbigo para dentro: assim a lombar não afunda. Se afundar, apoie os joelhos."
+  },
+  "prancha-lateral": {
+    pos: "De lado, apoio no antebraço (cotovelo embaixo do ombro) e na lateral do pé, corpo reto.",
+    mec: "Eleve o quadril e segure 30 segundos. Troque de lado.",
+    dica: "Quadril alto e alinhado. Se ficar difícil, apoie o joelho de baixo no chão."
+  },
+  "prancha-frontal": {
+    pos: "Apoio nas mãos (braços estendidos, mãos embaixo dos ombros) e na ponta dos pés, corpo reto.",
+    mec: "Segure a posição por 45 segundos, respirando normalmente.",
+    dica: "Glúteo contraído e umbigo para dentro. Não deixe o quadril subir nem afundar."
+  },
+  "toque-calcanhar": {
+    pos: "Deitada de barriga para cima, joelhos dobrados, pés apoiados, ombros levemente tirados do chão.",
+    mec: "Incline o tronco para o lado e toque o calcanhar com a mão. Alterne os lados. 20 toques de cada lado.",
+    dica: "Os ombros ficam fora do chão o tempo todo. Pescoço relaxado, olhar para cima."
+  },
+  "abdominal-remador": {
+    pos: "Deitada de barriga para cima, pernas esticadas e braços estendidos acima da cabeça.",
+    mec: "Suba o tronco e, ao mesmo tempo, dobre os joelhos em direção ao peito, levando os braços à frente. Volte devagar à posição inicial.",
+    dica: "Solte o ar na subida. Volte controlando, sem \"cair\" no chão. Se a lombar incomodar, faça com amplitude menor."
+  },
+  "elevacao-pelvica": {
+    pos: "Escápulas apoiadas no banco, pés apoiados na largura do quadril, joelhos a 90°, barra com protetor sobre o quadril.",
+    mec: "Suba o quadril até alinhar com o tronco, contraindo o glúteo. Segure 1-2 seg no topo e desça controlando.",
+    dica: "Empurre o chão com o calcanhar. Queixo levemente para baixo evita arquear a lombar. É o exercício mais seguro para o seu joelho — pode intensificar."
+  },
+  "stiff": {
+    pos: "Em pé, pés na largura do quadril, barra ou halteres à frente das coxas, joelhos levemente dobrados e fixos.",
+    mec: "Leve o quadril para trás descendo os pesos rente às pernas, com as costas retas, até sentir alongar atrás da coxa. Suba levando o quadril à frente.",
+    dica: "Desça só até onde a lombar continuar reta. Anote a carga sempre do mesmo jeito (total ou de cada halter)."
+  },
+  "flexora-em-pe": {
+    pos: "Em pé na máquina, de frente para o apoio, quadril e coxa encostados na almofada. Rolo atrás do tornozelo da perna que vai trabalhar, joelho alinhado com o eixo da máquina. Mãos nas alças.",
+    mec: "Dobre o joelho levando o calcanhar em direção ao glúteo, sem tirar a coxa da almofada. Pausa de 1 seg no topo e desça devagar (2-3 seg). Faça todas as repetições de uma perna e depois troque.",
+    dica: "O quadril não sai do apoio e a lombar não arqueia. A descida lenta é a parte mais importante. Comece pela perna mais fraca."
+  },
+  "cadeira-flexora-bilateral": {
+    pos: "Sentada, costas apoiadas, rolo atrás do tornozelo, coxas presas pelo apoio.",
+    mec: "Dobre os joelhos puxando o rolo para baixo e para trás. Volte controlando.",
+    dica: "Sem soltar o peso na volta."
+  },
+  "coice-polia-elevada": {
+    pos: "Tornozeleira presa na polia regulada na altura do quadril. De frente para a máquina, mãos no apoio, tronco levemente inclinado à frente.",
+    mec: "Leve a perna para trás estendendo o quadril e contraindo o glúteo. Pausa no fim e volte devagar.",
+    dica: "Com a polia na altura do quadril, o glúteo trabalha mais no fim do movimento. Não arqueie a lombar — se arquear, a carga está pesada."
+  },
+  "abdutora-tronco-inclinado": {
+    pos: "Sentada na cadeira abdutora, tronco inclinado à frente (peito em direção às coxas), mãos apoiadas na máquina.",
+    mec: "Abra as pernas até a contração máxima, pausa de 1 seg e feche controlando.",
+    dica: "Com o tronco inclinado, o glúteo trabalha mais que na posição sentada reta. Sem impulso."
+  },
+  "desenvolvimento-halteres": {
+    pos: "Sentada no banco com encosto, halteres na altura dos ombros, cotovelos levemente à frente.",
+    mec: "Empurre os halteres para cima até quase esticar os braços, sem travar o cotovelo. Desça até a altura das orelhas.",
+    dica: "Não arqueie a lombar. Mantenha as costas no encosto."
+  },
+  "crucifixo-inverso": {
+    pos: "Sentada de frente para o encosto, peito apoiado, braços estendidos à frente na altura dos ombros.",
+    mec: "Abra os braços para trás contraindo a parte de trás do ombro. Volte devagar.",
+    dica: "Sem impulso do tronco. Cotovelos levemente dobrados e fixos."
+  },
+  "supino-reto": {
+    pos: "Deitada no banco reto, olhos embaixo da barra, pés apoiados no chão. Ombros para trás e para baixo (escápulas encaixadas). Pegada um pouco mais aberta que os ombros.",
+    mec: "Tire a barra do suporte e desça controlando até perto da linha do peito, cotovelos a uns 45° do corpo. Empurre de volta até quase esticar os braços, sem travar o cotovelo.",
+    dica: "Glúteo e costas apoiados no banco o tempo todo. Se for treinar com carga mais pesada, peça ajuda para tirar e devolver a barra."
+  },
+  "peck-deck": {
+    pos: "Sentada, costas apoiadas, mãos ou antebraços nos apoios, cotovelos na altura do peito.",
+    mec: "Feche os braços à frente do corpo contraindo o peito. Volte controlando até sentir alongar o peito.",
+    dica: "Sem bater as peças. Ombros para trás e para baixo."
+  },
+  "triceps-corda": {
+    pos: "Em pé, de frente para a polia alta, corda nas mãos, cotovelos colados ao lado do corpo.",
+    mec: "Estenda os cotovelos levando a corda para baixo e abrindo as mãos no final. Volte até cerca de 90°.",
+    dica: "Só o cotovelo se mexe."
+  },
+  "triceps-frances": {
+    pos: "Sentada ou em pé, halter seguro com as duas mãos acima da cabeça, cotovelos apontando para cima.",
+    mec: "Desça o halter atrás da cabeça dobrando os cotovelos, sem abri-los para os lados. Suba de volta.",
+    dica: "Cotovelos apontados para cima o tempo todo. Abdômen firme para não arquear a lombar."
+  }
+};
+
+/* Mesmas categorias do Ciclo 1 (chaves que o dashboard reconhece) */
+const EVAL_CATS = [
+  {key:"frequência", label:"Frequência (fez os treinos)"},
+  {key:"humor", label:"Humor"},
+  {key:"energia", label:"Energia"},
+  {key:"sono", label:"Sono"}
+];
+
+const TOTAL_SEMANAS = 13;
+
+/* Registro de cólica */
+const COLICA_INT = [{v:1, nome:"Leve"}, {v:2, nome:"Moderada"}, {v:3, nome:"Forte"}];
+const COLICA_SINT = ["Escape de sangramento", "Inchaço", "Dor lombar", "Humor baixo", "Cansaço"];
+const COLICA_GAP_EPISODIO = 3;   /* registros com até 3 dias de distância contam como o mesmo episódio */
+const COLICA_MARGEM_JANELA = 3;  /* janela provável = início previsto ± 3 dias */
+const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+
+let state = {
+  peso: 64.35,
+  _currentTreino: "A",
+  _currentWeek: 1,
+  _evalWeek: 1,
+  evalNotas: {},
+  evalObs: {},
+  colica: {}
+};
+
+function keyFor(week, treino, slug){ return `w${week}-t${treino}-${slug}`; }
+
+function getLastLoad(treino, slug, week){
+  for (let w = week - 1; w >= 1; w--){
+    const k = keyFor(w, treino, slug);
+    if (state[k] && state[k].load) return state[k].load;
+  }
+  return '';
+}
+
+function saveLocal(){
+  try{ localStorage.setItem('leticiab_c2_state', JSON.stringify(state)); }catch(e){}
+}
+
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem('leticiab_c2_state');
+    if (raw) Object.assign(state, JSON.parse(raw));
+  }catch(e){}
+}
+
+let saveTimer = null;
+let saveInFlight = false;
+let savePendingAfterFlight = false;
+
+const firebaseConfig = {
+  databaseURL: "https://helloradana-consultoria-default-rtdb.firebaseio.com"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const ALUNO_ID = "leticia-b-c2"; /* Ciclo 2 — o histórico do Ciclo 1 continua no ID "leticia-b" */
+const stateRef = db.ref('/alunos/' + ALUNO_ID + '/state');
+
+function persist(){
+  saveLocal();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushSaveToFirebase, 350);
+}
+
+function flushSaveToFirebase(){
+  if (saveInFlight){ savePendingAfterFlight = true; return; }
+  saveInFlight = true;
+  stateRef.set(state).catch(()=>{ console.warn('Firebase offline'); }).finally(()=>{
+    saveInFlight = false;
+    if (savePendingAfterFlight){
+      savePendingAfterFlight = false;
+      flushSaveToFirebase();
+    }
+  });
+}
+
+function loadFromFirebase(cb){
+  stateRef.once('value').then(snap=>{
+    const val = snap.val();
+    if (val) Object.assign(state, val);
+    if (!state.colica) state.colica = {};
+    cb && cb();
+  }).catch(()=>{ if (!state.colica) state.colica = {}; cb && cb(); });
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-' + btn.dataset.view).classList.add('active');
+  });
+});
+
+/* ── Progressão de 3 em 3 semanas ── */
+function renderAvisoProgressao(){
+  const w = state._currentWeek;
+  const el = document.getElementById('avisoProgressao');
+  let titulo, tag, texto;
+  if (w === 13){
+    titulo = "Semana de manutenção"; tag = "Semana 13";
+    texto = "Mantenha as cargas. É a semana de tirar fotos e medidas para a próxima análise.";
+  } else {
+    const bloco = Math.floor((w - 1) / 3) + 1;
+    const ini = (bloco - 1) * 3 + 1, fim = ini + 2;
+    tag = `Bloco ${bloco} · sem ${ini}–${fim}`;
+    if (w === 1){
+      titulo = "Encontre a sua carga";
+      texto = "Primeira semana do ciclo: ache a carga que deixa cada exercício no RPE pedido e mantenha até a semana 3.";
+    } else if (w === ini){
+      titulo = "Semana de subir a carga";
+      texto = "Se nas últimas 3 semanas você fechou todas as séries no RPE pedido, suba a carga a partir de hoje. Se não fechou, mantenha por mais 3 semanas. Agachamento taça, extensora e leg press sobem bem devagar.";
+    } else {
+      titulo = "Mantenha a carga";
+      texto = `Use a mesma carga do início do bloco. A próxima subida é na semana ${fim + 1 > 12 ? 13 : fim + 1}${fim + 1 > 12 ? ' (manutenção)' : ''}.`;
+      if (fim + 1 > 12) texto = "Use a mesma carga do início do bloco. Na semana 13 as cargas ficam mantidas.";
+    }
+  }
+  el.innerHTML = `
+    <div class="aviso-topo">
+      <div class="aviso-titulo">${titulo}</div>
+      <div class="aviso-tag">${tag}</div>
+    </div>
+    <div class="aviso-texto">${texto}</div>
+  `;
+}
+
+function renderWeekSwitchTreino(){
+  const el = document.getElementById('weekSwitchTreino');
+  el.innerHTML = '';
+  for (let w=1; w<=TOTAL_SEMANAS; w++){
+    const chip = document.createElement('div');
+    chip.className = 'week-chip' + (state._currentWeek === w ? ' active' : '');
+    chip.textContent = 'Sem ' + w;
+    chip.addEventListener('click', ()=>{
+      state._currentWeek = w;
+      persist();
+      renderWeekSwitchTreino();
+      renderAvisoProgressao();
+      renderExercicios();
+      updateSemanaPill();
+    });
+    el.appendChild(chip);
+  }
+}
+
+function renderTreinoSwitch(){
+  const el = document.getElementById('treinoSwitch');
+  el.innerHTML = '';
+  Object.keys(TREINOS).forEach(key=>{
+    const chip = document.createElement('div');
+    chip.className = 'treino-chip' + (state._currentTreino === key ? ' active' : '');
+    chip.textContent = TREINOS[key].label;
+    chip.addEventListener('click', ()=>{
+      state._currentTreino = key;
+      persist();
+      renderTreinoSwitch();
+      renderExercicios();
+    });
+    el.appendChild(chip);
+  });
+  document.getElementById('treinoSub').textContent = TREINOS[state._currentTreino].sub;
+}
+
+function subListHtml(ex){
+  let subHtml = '';
+  ex.subItems.forEach(sub=>{
+    subHtml += `<div style="font-size:12.5px; color:var(--tinta-suave); margin: 6px 0; padding: 6px 0; border-bottom: 1px solid var(--linha);">
+      <span style="font-weight:500;">${sub.nome}</span> — ${sub.series}x${sub.reps}
+    </div>`;
+  });
+  return subHtml;
+}
+
+function renderExercicios(){
+  const treino = TREINOS[state._currentTreino];
+  const list = document.getElementById('exList');
+  list.innerHTML = '';
+
+  const week = state._currentWeek;
+  const treinoKey = state._currentTreino;
+
+  treino.exercicios.forEach(ex=>{
+    const k = keyFor(week, treinoKey, ex.slug);
+    const saved = state[k] || {done:false, load:""};
+    const loadValue = saved.load || getLastLoad(treinoKey, ex.slug, week);
+    if (!saved.load && loadValue){
+      state[k] = {done: saved.done, load: loadValue};
+    }
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    if (ex.isCore || ex.isBloco){
+      card.innerHTML = `
+        <div class="card-head">
+          <div>
+            <div class="ex-nome">${ex.nome}</div>
+            ${ex.isBloco ? `<div class="ex-foco">Abdômen · RPE 6-7</div>` : `<div class="ex-foco">Ativação · RPE 5-6</div>`}
+          </div>
+          <div class="check ${saved.done ? 'done' : ''}" data-key="${k}"></div>
+        </div>
+        <div style="margin-top:8px;">
+          ${subListHtml(ex)}
+        </div>
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="card-head">
+          <div>
+            <div class="ex-nome">${ex.nome}</div>
+            <div class="ex-foco">${ex.foco}</div>
+          </div>
+          <div class="check ${saved.done ? 'done' : ''}" data-key="${k}"></div>
+        </div>
+        <div class="badges">
+          <div class="badge">${ex.series} ${ex.series === 1 ? 'série' : 'séries'}</div>
+          <div class="badge">${ex.reps}${/^[0-9]/.test(ex.reps) && !/(min|seg)/.test(ex.reps) ? ' reps' : ''}</div>
+          ${ex.descanso !== '—' ? `<div class="badge">${ex.descanso}</div>` : ''}
+          ${ex.rpe !== '—' ? `<div class="badge rpe">RPE ${ex.rpe}</div>` : ''}
+        </div>
+        ${ex.obs ? `<div class="ex-obs">${ex.obs}</div>` : ''}
+        ${ex.load ? `<div class="load-row">
+          <label>Carga:</label>
+          <input type="text" inputmode="decimal" placeholder="kg" data-load="${k}" value="${loadValue}">
+        </div>` : ''}
+        ${ex.ref && week === 1 && !loadValue ? `<div class="ex-ref">Última carga do Ciclo 1: ${ex.ref.replace('.', ',')} kg</div>` : ''}
+        ${ex.options ? `<div style="font-size:11.5px; color:var(--tinta-suave); margin-top:8px;">💡 ${ex.options}</div>` : ''}
+      `;
+    }
+
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll('.check').forEach(chk=>{
+    chk.addEventListener('click', ()=>{
+      const k = chk.dataset.key;
+      const current = state[k] || {done:false, load:""};
+      current.done = !current.done;
+      state[k] = current;
+      chk.classList.toggle('done');
+      persist();
+    });
+  });
+
+  list.querySelectorAll('[data-load]').forEach(input=>{
+    input.addEventListener('input', ()=>{
+      const k = input.dataset.load;
+      const current = state[k] || {done:false, load:""};
+      current.load = input.value;
+      state[k] = current;
+      persist();
+    });
+  });
+}
+
+document.getElementById('btnSalvarTreino').addEventListener('click', ()=>{
+  persist();
+  showToast('Treino salvo!');
+});
+
+function renderGuia(){
+  const el = document.getElementById('guiaList');
+  el.innerHTML = '';
+  const vistos = {};
+  function addItem(slug, nome, foco){
+    if (vistos[slug] || !GUIA[slug]) return;
+    vistos[slug] = true;
+    const g = GUIA[slug];
+    const div = document.createElement('div');
+    div.className = 'guia-item';
+    div.innerHTML = `
+      <div class="ex-nome" style="font-size:14px;">${nome}</div>
+      ${foco ? `<div class="ex-foco">${foco}</div>` : ''}
+      <div class="guia-parte">📍 Posicionamento</div>
+      <div class="guia-desc">${g.pos}</div>
+      <div class="guia-parte">⚙️ Mecânica do Movimento</div>
+      <div class="guia-desc">${g.mec}</div>
+      <div class="guia-parte">💡 Dica</div>
+      <div class="guia-desc">${g.dica}</div>
+    `;
+    el.appendChild(div);
+  }
+  Object.values(TREINOS).forEach(treino=>{
+    treino.exercicios.forEach(ex=>{
+      if (ex.isCore){
+        ex.subItems.forEach(sub=> addItem(sub.slug, sub.nome, 'Fortalecimento de Core'));
+      } else if (ex.isBloco){
+        ex.subItems.forEach(sub=> addItem(sub.slug, sub.nome, ex.nome));
+      } else {
+        addItem(ex.slug, ex.nome, ex.foco);
+      }
+    });
+  });
+}
+
+function renderWeekSwitch(){
+  const el = document.getElementById('weekSwitch');
+  el.innerHTML = '';
+  for (let w=1; w<=TOTAL_SEMANAS; w++){
+    const chip = document.createElement('div');
+    chip.className = 'week-chip' + (state._evalWeek === w ? ' active' : '');
+    chip.textContent = 'Sem ' + w;
+    chip.addEventListener('click', ()=>{
+      state._evalWeek = w;
+      persist();
+      renderWeekSwitch();
+      renderEvalCats();
+    });
+    el.appendChild(chip);
+  }
+}
+
+function renderEvalCats(){
+  const el = document.getElementById('evalCats');
+  el.innerHTML = '';
+  const week = state._evalWeek;
+  const weekKey = week;
+  const notas = (state.evalNotas && state.evalNotas[weekKey]) || {};
+
+  EVAL_CATS.forEach(cat=>{
+    const div = document.createElement('div');
+    div.className = 'eval-cat';
+    let scaleHtml = '';
+    for (let n=1; n<=5; n++){
+      const active = notas[cat.key] === n ? ' active' : '';
+      scaleHtml += `<div class="eval-dot${active}" data-cat="${cat.key}" data-val="${n}">${n}</div>`;
+    }
+    div.innerHTML = `<div class="eval-cat-name">${cat.label}</div><div class="eval-scale">${scaleHtml}</div>`;
+    el.appendChild(div);
+  });
+
+  el.querySelectorAll('.eval-dot').forEach(dot=>{
+    dot.addEventListener('click', ()=>{
+      const cat = dot.dataset.cat;
+      const val = parseInt(dot.dataset.val);
+      if (!state.evalNotas) state.evalNotas = {};
+      if (!state.evalNotas[weekKey]) state.evalNotas[weekKey] = {};
+      state.evalNotas[weekKey][cat] = val;
+      persist();
+      renderEvalCats();
+    });
+  });
+
+  document.getElementById('evalObs').value = (state.evalObs && state.evalObs[weekKey]) || '';
+}
+
+document.getElementById('evalObs').addEventListener('input', (e)=>{
+  const weekKey = state._evalWeek;
+  if (!state.evalObs) state.evalObs = {};
+  state.evalObs[weekKey] = e.target.value;
+  persist();
+});
+
+document.getElementById('btnSalvarAvaliacao').addEventListener('click', ()=>{
+  persist();
+  showToast('Avaliação salva!');
+});
+
+/* ── Registro de cólica ──
+   state.colica = { "AAAA-MM-DD": {int: 1|2|3, sint: [..], obs: ""} } */
+function isoDate(d){
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${dd}`;
+}
+function parseIso(s){
+  const p = s.split('-').map(Number);
+  return new Date(p[0], p[1] - 1, p[2]);
+}
+function brDate(d){
+  return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+}
+function addDias(d, n){ const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function difDias(a, b){ return Math.round((b - a) / 86400000); }
+function hojeZero(){ const h = new Date(); h.setHours(0,0,0,0); return h; }
+
+let colicaForm = {data: isoDate(new Date()), int: 0, sint: []};
+let calMes = (()=>{ const h = new Date(); return {ano: h.getFullYear(), mes: h.getMonth()}; })();
+
+/* Agrupa os dias registrados em episódios (dias próximos = mesmo episódio) */
+function episodiosColica(){
+  const dias = Object.keys(state.colica || {}).sort().map(parseIso);
+  const eps = [];
+  dias.forEach(d=>{
+    const ult = eps[eps.length - 1];
+    if (ult && difDias(ult.fim, d) <= COLICA_GAP_EPISODIO){ ult.fim = d; ult.dias++; }
+    else eps.push({inicio: d, fim: d, dias: 1});
+  });
+  return eps;
+}
+
+/* Previsão: precisa de pelo menos 2 episódios (1 intervalo) */
+function previsaoColica(){
+  const eps = episodiosColica();
+  if (eps.length < 2) return {eps, media: null};
+  const ints = [];
+  for (let i = 1; i < eps.length; i++) ints.push(difDias(eps[i-1].inicio, eps[i].inicio));
+  const media = Math.round(ints.reduce((a,b)=>a+b, 0) / ints.length);
+  if (media < 7) return {eps, media: null, ints};
+  const hoje = hojeZero();
+  let proximo = addDias(eps[eps.length - 1].inicio, media);
+  while (addDias(proximo, COLICA_MARGEM_JANELA) < hoje) proximo = addDias(proximo, media);
+  return {
+    eps, ints, media, proximo,
+    janelaIni: addDias(proximo, -COLICA_MARGEM_JANELA),
+    janelaFim: addDias(proximo, COLICA_MARGEM_JANELA)
+  };
+}
+
+function naJanela(d, prev){
+  if (!prev || !prev.media) return false;
+  let ini = prev.janelaIni, fim = prev.janelaFim;
+  /* também marca as janelas seguintes no calendário */
+  for (let i = 0; i < 6; i++){
+    if (d >= ini && d <= fim) return true;
+    ini = addDias(ini, prev.media); fim = addDias(fim, prev.media);
+  }
+  return false;
+}
+
+function renderColicaForm(){
+  document.getElementById('colicaData').value = colicaForm.data;
+  const intEl = document.getElementById('colicaInt');
+  intEl.innerHTML = '';
+  COLICA_INT.forEach(o=>{
+    const c = document.createElement('div');
+    c.className = 'chip-opt' + (colicaForm.int === o.v ? ' active' : '');
+    c.textContent = o.nome;
+    c.addEventListener('click', ()=>{ colicaForm.int = o.v; renderColicaForm(); });
+    intEl.appendChild(c);
+  });
+  const sEl = document.getElementById('colicaSint');
+  sEl.innerHTML = '';
+  COLICA_SINT.forEach(s=>{
+    const c = document.createElement('div');
+    c.className = 'chip-opt' + (colicaForm.sint.indexOf(s) >= 0 ? ' active' : '');
+    c.textContent = s;
+    c.addEventListener('click', ()=>{
+      const i = colicaForm.sint.indexOf(s);
+      if (i >= 0) colicaForm.sint.splice(i, 1); else colicaForm.sint.push(s);
+      renderColicaForm();
+    });
+    sEl.appendChild(c);
+  });
+  const existe = !!(state.colica && state.colica[colicaForm.data]);
+  document.getElementById('btnColicaApagar').style.display = existe ? '' : 'none';
+  document.getElementById('btnColicaSalvar').textContent = existe ? 'Atualizar registro' : 'Registrar cólica';
+}
+
+function carregarDiaNoForm(iso){
+  const r = (state.colica || {})[iso];
+  colicaForm = {data: iso, int: r ? r.int : 0, sint: r && r.sint ? r.sint.slice() : []};
+  document.getElementById('colicaObs').value = r && r.obs ? r.obs : '';
+  renderColicaForm();
+}
+
+document.getElementById('colicaData').addEventListener('change', (e)=>{
+  if (e.target.value) carregarDiaNoForm(e.target.value);
+});
+
+document.getElementById('btnColicaSalvar').addEventListener('click', ()=>{
+  if (!colicaForm.int){ showToast('Escolha a intensidade'); return; }
+  if (!colicaForm.data){ showToast('Escolha a data'); return; }
+  if (!state.colica) state.colica = {};
+  state.colica[colicaForm.data] = {
+    int: colicaForm.int,
+    sint: colicaForm.sint.slice(),
+    obs: document.getElementById('colicaObs').value || ""
+  };
+  persist();
+  const d = parseIso(colicaForm.data);
+  calMes = {ano: d.getFullYear(), mes: d.getMonth()};
+  renderColicaTudo();
+  showToast('Cólica registrada!');
+});
+
+document.getElementById('btnColicaApagar').addEventListener('click', ()=>{
+  if (state.colica && state.colica[colicaForm.data]){
+    delete state.colica[colicaForm.data];
+    persist();
+    carregarDiaNoForm(colicaForm.data);
+    renderColicaTudo();
+    showToast('Registro apagado');
+  }
+});
+
+document.getElementById('calPrev').addEventListener('click', ()=>{
+  calMes.mes--; if (calMes.mes < 0){ calMes.mes = 11; calMes.ano--; }
+  renderCalendario();
+});
+document.getElementById('calNext').addEventListener('click', ()=>{
+  calMes.mes++; if (calMes.mes > 11){ calMes.mes = 0; calMes.ano++; }
+  renderCalendario();
+});
+
+function renderCalendario(){
+  document.getElementById('calMes').textContent = MESES[calMes.mes] + ' ' + calMes.ano;
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  ['D','S','T','Q','Q','S','S'].forEach(d=>{
+    const h = document.createElement('div'); h.className = 'cal-dow'; h.textContent = d; grid.appendChild(h);
+  });
+  const prev = previsaoColica();
+  const primeiro = new Date(calMes.ano, calMes.mes, 1);
+  const nDias = new Date(calMes.ano, calMes.mes + 1, 0).getDate();
+  for (let i = 0; i < primeiro.getDay(); i++){
+    const v = document.createElement('div'); v.className = 'cal-day vazio'; grid.appendChild(v);
+  }
+  const hojeIso = isoDate(new Date());
+  for (let d = 1; d <= nDias; d++){
+    const data = new Date(calMes.ano, calMes.mes, d);
+    const iso = isoDate(data);
+    const r = (state.colica || {})[iso];
+    const cell = document.createElement('div');
+    let cls = 'cal-day';
+    if (r) cls += ' i' + r.int;
+    else if (naJanela(data, prev)) cls += ' janela';
+    if (iso === hojeIso) cls += ' hoje';
+    cell.className = cls;
+    cell.textContent = d;
+    cell.addEventListener('click', ()=>{
+      carregarDiaNoForm(iso);
+      document.getElementById('colicaData').scrollIntoView({behavior:'smooth', block:'center'});
+    });
+    grid.appendChild(cell);
+  }
+}
+
+function renderPadrao(){
+  const el = document.getElementById('padraoBox');
+  const prev = previsaoColica();
+  const nReg = Object.keys(state.colica || {}).length;
+  if (!nReg){
+    el.innerHTML = `<div style="font-size:12.5px; color:var(--tinta-suave); line-height:1.5;">Nenhuma cólica registrada ainda. Registre os dias em que sentir cólica e, com 2 a 3 episódios, o seu padrão aparece aqui.</div>`;
+    return;
+  }
+  const ult = prev.eps[prev.eps.length - 1];
+  let html = `
+    <div class="padrao-row">
+      <div class="padrao-box"><div class="padrao-num">${prev.eps.length}</div><div class="padrao-lbl">${prev.eps.length === 1 ? 'episódio registrado' : 'episódios registrados'}</div></div>
+      <div class="padrao-box"><div class="padrao-num">${prev.media ? prev.media + ' dias' : '—'}</div><div class="padrao-lbl">intervalo médio</div></div>
+    </div>`;
+  if (prev.media){
+    html += `<div class="aviso-texto" style="margin-top:10px;"><b>Próxima janela provável:</b> ${brDate(prev.janelaIni)} a ${brDate(prev.janelaFim)}.</div>`;
+  } else {
+    html += `<div class="aviso-texto" style="margin-top:10px; color:var(--tinta-suave);">Continue registrando: a partir do 2º episódio o site calcula o intervalo e prevê a próxima janela.</div>`;
+  }
+  html += `<div class="aviso-nota">Último episódio: começou em ${brDate(ult.inicio)} e durou ${ult.dias} ${ult.dias === 1 ? 'dia' : 'dias'}. Previsão aproximada, baseada só nos seus registros — não é diagnóstico.</div>`;
+
+  const dias = Object.keys(state.colica).sort().reverse().slice(0, 6);
+  html += `<div class="sub-label">Últimos registros</div><div class="reg-lista">`;
+  dias.forEach(iso=>{
+    const r = state.colica[iso];
+    const nomeInt = (COLICA_INT.find(o=>o.v === r.int) || {}).nome || '';
+    const extra = (r.sint && r.sint.length) ? ' · ' + r.sint.join(', ') : '';
+    html += `<div class="reg-item"><b>${brDate(parseIso(iso))}</b> — cólica ${nomeInt.toLowerCase()}${extra}${r.obs ? `<br><span style="color:var(--tinta-suave);">${r.obs}</span>` : ''}</div>`;
+  });
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+/* Aviso na aba Treino quando hoje tem cólica registrada ou está na janela provável */
+function renderAvisoColica(){
+  const el = document.getElementById('avisoColica');
+  const hoje = hojeZero();
+  const r = (state.colica || {})[isoDate(hoje)];
+  const prev = previsaoColica();
+  let titulo = null, texto = '';
+  if (r){
+    titulo = "Dia de cólica registrado";
+    texto = "Treine mais leve hoje: baixe 1 a 2 pontos de RPE e tire 1 série de cada exercício. Treinar leve é melhor que faltar.";
+  } else if (prev.media && hoje >= prev.janelaIni && hoje <= prev.janelaFim){
+    titulo = "Janela provável de cólica";
+    texto = "Pelos seus registros, a cólica costuma aparecer nestes dias. Se ela vier, treine mais leve em vez de faltar — e lembre de registrar na aba Avaliação.";
+  }
+  if (!titulo){ el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="aviso colica">
+      <div class="aviso-topo">
+        <div class="aviso-titulo">${titulo}</div>
+        <div class="aviso-tag">Hoje</div>
+      </div>
+      <div class="aviso-texto">${texto}</div>
+    </div>`;
+}
+
+function renderColicaTudo(){
+  renderColicaForm();
+  renderCalendario();
+  renderPadrao();
+  renderAvisoColica();
+}
+
+function renderPerfil(){
+  document.getElementById('pesoInput').value = state.peso != null ? state.peso : 64.35;
+}
+
+document.getElementById('btnSalvarPerfil').addEventListener('click', ()=>{
+  const val = parseFloat(document.getElementById('pesoInput').value);
+  if (!isNaN(val)) state.peso = val;
+  persist();
+  showToast('Peso atualizado!');
+});
+
+function updateSemanaPill(){
+  document.getElementById('semanaPill').textContent = 'Semana ' + state._currentWeek;
+}
+
+function renderAll(){
+  renderWeekSwitchTreino();
+  renderAvisoProgressao();
+  renderTreinoSwitch();
+  renderExercicios();
+  renderGuia();
+  renderWeekSwitch();
+  renderEvalCats();
+  carregarDiaNoForm(isoDate(new Date()));
+  renderColicaTudo();
+  renderPerfil();
+  updateSemanaPill();
+}
+
+/* Mostra o site mesmo se o Firebase demorar a responder (internet ruim) */
+let jaRenderizou = false;
+loadLocal();
+loadFromFirebase(()=>{ jaRenderizou = true; renderAll(); });
+setTimeout(()=>{ if (!jaRenderizou){ jaRenderizou = true; renderAll(); } }, 2500);
+</script>
+</body>
+</html>
